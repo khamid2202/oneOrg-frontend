@@ -9,9 +9,9 @@ import Login from "./Pages/auth/Login/Login";
 import LandingPage from "./Pages/admin/LandingPage/LandingPage";
 import LayoutWithHeader from "./Layouts/Layout";
 import ProtectedRoute from "./Pages/auth/ProtectedRoute";
-import Classes from "./Pages/admin/Groups/Classes";
+import Classes from "./Pages/admin/ManagementPage/Groups/Classes.jsx";
 import Teachers from "./Pages/admin/Teachers/Teachers.jsx";
-import ClassManagement from "./Pages/admin/Groups/ClassManagement";
+import ClassManagement from "./Pages/admin/ManagementPage/Groups/ClassManagement.jsx";
 import Timetable from "./Pages/admin/Timetable/Timetable";
 import Exams from "./Pages/admin/Exams/Exams.jsx";
 import TeacherLessonsPage from "./Pages/teacher/Lessons/TeacherLessonsPage.jsx";
@@ -59,7 +59,7 @@ function App() {
           }}
         />
         <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route
             element={
@@ -88,10 +88,7 @@ function App() {
             />
             <Route path="/tools" element={<Tools />} />
             <Route path="/new-payments" element={<PaymentsPage />} />
-            <Route
-              path="/management/invoivces-2.0"
-              element={<New_Invoices />}
-            />
+            <Route path="/management/invoices-2.0" element={<New_Invoices />} />
           </Route>
         </Routes>
       </Router>

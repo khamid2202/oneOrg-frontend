@@ -29,12 +29,21 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   // Fetch and verify user from API
-  const fetchUser = useCallback(async () => {
+  const fetchUser = useCallback(async (skipCheck = false) => {
+    // Check if user has ever logged in (avoid unnecessary API calls)
+    const hasSession = localStorage.getItem("hasSession");
+    if (!skipCheck && !hasSession) {
+      setUser(null);
+      setAuthLoading(false);
+      return false;
+    }
+
     try {
       // First validate the token
       const validateRes = await api.get(endpoints.VALIDATE);
       if (!validateRes.data?.ok) {
         setUser(null);
+        localStorage.removeItem("hasSession");
         setAuthLoading(false);
         return false;
       }
@@ -52,9 +61,13 @@ export const AuthProvider = ({ children }) => {
         return false;
       }
     } catch (err) {
-      console.error("Auth verification failed:", err);
+      // Don't log error for expected 400/401 responses (user not authenticated)
+      if (err?.response?.status !== 400 && err?.response?.status !== 401) {
+        console.error("Auth verification failed:", err);
+      }
       setUser(null);
-      setAuthError(err?.message || "Authentication failed");
+      localStorage.removeItem("hasSession");
+      setAuthError(null); // Don't set error for unauthenticated users
       setAuthLoading(false);
       return false;
     }
@@ -86,7 +99,8 @@ export const AuthProvider = ({ children }) => {
   // Called after successful login to refresh user data
   const onLoginSuccess = useCallback(async () => {
     setAuthLoading(true);
-    return fetchUser();
+    localStorage.setItem("hasSession", "true");
+    return fetchUser(true); // skipCheck=true since we just logged in
   }, [fetchUser]);
 
   const value = useMemo(
@@ -115,7 +129,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       onLoginSuccess,
       fetchUser,
-    ]
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

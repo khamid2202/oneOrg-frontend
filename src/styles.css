@@ -15,13 +15,7 @@
 
 /* Mobile view adjustments */
 @media (max-width: 768px) {
-  .fixed-table {
-    /* Additional mobile styles if needed */
-  }
-
-  .full-width-table {
-    /* Additional mobile styles if needed */
-  }
+  
 
   table {
     width: 100%; /* Ensure table takes full width on mobile */

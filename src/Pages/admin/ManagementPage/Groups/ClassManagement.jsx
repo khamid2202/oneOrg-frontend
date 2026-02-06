@@ -8,10 +8,11 @@ import {
   CalendarClock,
   Search,
 } from "lucide-react";
-import { api } from "../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../Library/Endpoints.jsx";
-import AddStudentModal from "./AddStudentModal";
-import { useAuth } from "../../../Hooks/AuthContext.jsx";
+
+import AddStudentModal from "../Groups/AddStudentModal.jsx";
+import { api } from "../../../../Library/RequestMaker.jsx";
+import { endpoints } from "../../../../Library/Endpoints.jsx";
+import { useAuth } from "../../../../Hooks/AuthContext.jsx";
 
 function ClassManagement() {
   const location = useLocation();

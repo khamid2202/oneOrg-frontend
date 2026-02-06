@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { api } from "../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../Library/Endpoints.jsx";
+import { api } from "../../../../Library/RequestMaker.jsx";
+import { endpoints } from "../../../../Library/Endpoints.jsx";
 
 export default function AddStudentModal({
   isOpen,

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../Library/Endpoints.jsx";
+import { api } from "../../../../Library/RequestMaker.jsx";
+import { endpoints } from "../../../../Library/Endpoints.jsx";
 import { BookOpen, Users, User, Clock, BarChart3 } from "lucide-react";
-import MultiSelectDropdown from "../../../Layouts/MultiSelectDropdown.jsx";
+import MultiSelectDropdown from "../../../../Layouts/MultiSelectDropdown.jsx";
 
 const gradeColors = {
   4: "bg-blue-50 text-blue-700 border-blue-100",
