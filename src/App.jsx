@@ -75,6 +75,7 @@ function App() {
             <Route path="/management/billings" element={<Billings />} />
             <Route path="/management/discounts" element={<Discounts />} />
             <Route path="/classes" element={<Classes />} />
+            <Route path="/management/classes" element={<Classes />} />
             <Route path="/class-management" element={<ClassManagement />} />
             <Route path="/teachers" element={<Teachers />} />
             <Route path="/exams" element={<Exams />} />

@@ -36,8 +36,6 @@ function Navbar({ isExpanded, setIsExpanded }) {
   const getVisibleNavItems = () => {
     const allItems = [
       { to: "/home", icon: <Home size={20} />, label: "Home" },
-      { to: "/classes", icon: <BookOpen size={20} />, label: "Classes" },
-
       { to: "/teachers", icon: <Users size={20} />, label: "Tutors" },
       // {
       //   to: "/classes-to-view",

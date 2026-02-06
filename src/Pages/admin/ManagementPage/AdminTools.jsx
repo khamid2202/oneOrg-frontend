@@ -14,7 +14,7 @@ function AdminTools() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
-            to="/classes"
+            to="/management/classes"
             className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="flex items-center justify-between">
