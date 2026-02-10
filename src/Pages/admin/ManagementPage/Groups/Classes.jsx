@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../../Library/Endpoints.jsx";
-import { BookOpen, Users, User, Clock, BarChart3 } from "lucide-react";
+import { BookOpen, Users, User, BarChart3 } from "lucide-react";
 import MultiSelectDropdown from "../../../../Layouts/MultiSelectDropdown.jsx";
+import { useGlobalContext } from "../../../../Hooks/UseContext.jsx";
 
 const gradeColors = {
   4: "bg-blue-50 text-blue-700 border-blue-100",
@@ -24,46 +23,13 @@ const formatDate = (dateString) => {
 };
 
 function Classes() {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { classes, classesLoading, classesError } = useGlobalContext();
   const [search, setSearch] = useState("");
   const [selectedClasses, setSelectedClasses] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const cached = localStorage.getItem("classes");
-
-    const hydrate = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get(endpoints.GET_CLASSES);
-        const payload = Array.isArray(res?.data?.groups)
-          ? res.data.groups
-          : Array.isArray(res?.data)
-            ? res.data
-            : [];
-        setGroups(payload);
-        localStorage.setItem("classes", JSON.stringify(payload));
-      } catch (err) {
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached);
-            setGroups(Array.isArray(parsed) ? parsed : []);
-          } catch (e) {
-            setError("Failed to load classes");
-          }
-        } else {
-          setError(err?.response?.data?.message || "Failed to load classes");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    hydrate();
-  }, []);
+  const groups = Array.isArray(classes) ? classes : [];
+  const loading = classesLoading;
+  const error = classesError;
 
   const stats = useMemo(() => {
     const totalGroups = groups.length;
@@ -129,11 +95,9 @@ function Classes() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8 font-sans">
-      <div className="mx-auto w-full max-w-7xl space-y-8">
+      <div className="mx-auto w-full max-w-7xl space-y-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-semibold text-slate-900">
-            Academic Groups
-          </h1>
+          <h1 className="text-3xl font-semibold text-slate-900">Classes</h1>
           <p className="text-sm text-slate-600">Academic Year 2025-2026</p>
         </div>
 
@@ -227,6 +191,7 @@ function Classes() {
                 <div
                   key={g.id}
                   className="group relative flex h-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                  onClick={() => console.log("classInfo from card:", g)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">

@@ -35,7 +35,10 @@ function TableRow({
         const tuitionAmount = extractTuitionAmountFromCode(code);
         const allowedAmount = getAllowedTuitionAmount(student);
         const isTuitionCode = tuitionAmount !== null;
-        const baseDisabled = isTuitionCode && tuitionAmount !== allowedAmount;
+        const baseDisabled =
+          isTuitionCode &&
+          allowedAmount !== null &&
+          tuitionAmount !== allowedAmount;
         const checked = studentHasBillingCode(student, code);
 
         const pendingKey = `${studentId}-${code}`;

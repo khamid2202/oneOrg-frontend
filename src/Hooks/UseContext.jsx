@@ -45,6 +45,8 @@ export const DataProvider = ({ children }) => {
   const [selectedPurpose, setSelectedPurpose] = useState("tuition");
   const [billings, setBillings] = useState([]);
   const [classes, setClasses] = useState([]);
+  const [classesLoading, setClassesLoading] = useState(false);
+  const [classesError, setClassesError] = useState(null);
   const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -316,15 +318,38 @@ export const DataProvider = ({ children }) => {
 
   //CLASSES
   const fetchClasses = async () => {
+    setClassesLoading(true);
+    setClassesError(null);
     try {
       const response = await api.get(endpoints.GET_CLASSES);
-      const classes = response.data.groups || [];
-      console.log("Fetched classes:", classes);
-
-      setClasses(classes);
+      const raw = response.data.groups || [];
+      const sortKey = (entry) => entry?.class_pair || entry?.name || "";
+      const parseClassKey = (value) => {
+        const match = value.match(/^(\d+)[-\s]?(.*)$/);
+        if (!match) {
+          return { num: Number.MAX_SAFE_INTEGER, suffix: value };
+        }
+        return {
+          num: Number.parseInt(match[1], 10),
+          suffix: (match[2] || "").trim(),
+        };
+      };
+      const sorted = [...raw].sort((a, b) => {
+        const aKey = parseClassKey(sortKey(a));
+        const bKey = parseClassKey(sortKey(b));
+        if (aKey.num !== bKey.num) return aKey.num - bKey.num;
+        return aKey.suffix.localeCompare(bKey.suffix, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
+      setClasses(sorted);
     } catch (error) {
       console.error("Error fetching classes:", error);
       setClasses([]);
+      setClassesError(error?.message || "Failed to load classes");
+    } finally {
+      setClassesLoading(false);
     }
   };
 
@@ -424,6 +449,8 @@ export const DataProvider = ({ children }) => {
       notifyInvoiceCreated,
       setClasses,
       classes,
+      classesLoading,
+      classesError,
       teachers,
       searchTerm,
       setSearchTerm,
@@ -456,6 +483,8 @@ export const DataProvider = ({ children }) => {
       selectedPurpose,
       billings,
       classes,
+      classesLoading,
+      classesError,
       teachers,
       searchTerm,
     ],

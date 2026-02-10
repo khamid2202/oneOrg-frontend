@@ -10,17 +10,21 @@ import ClassFilter from "./Filters/ClassFilter";
 import TeacherFilter from "./Filters/TeacherFilter";
 import InvoiceCodeFilter from "./Filters/InvoiceCodeFilter";
 
-//GET ALLOWED TUITION IS NOT class specific HARDCODED ANYMORE
-const getAllowedTuitionAmount = (student) => {
-  const billingCode = student?.billings?.find(
-    (b) => typeof b?.code === "string" && b.code.startsWith("tuition"),
-  )?.code;
+const getStudentGrade = (student) => {
+  const directGrade = Number(student?.group?.grade);
+  if (Number.isFinite(directGrade)) return directGrade;
+  const classPair = student?.group?.class_pair || "";
+  const match = String(classPair).match(/^(\d+)/);
+  if (!match) return null;
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
-  if (typeof billingCode !== "string") return null;
-  const parts = billingCode.split("/");
-  if (parts.length < 2) return null;
-  const num = Number(parts[1]);
-  return Number.isFinite(num) ? num : null;
+// Tuition rules: grades 1-4 => 2300, grades 5+ => 2600
+const getAllowedTuitionAmount = (student) => {
+  const grade = getStudentGrade(student);
+  if (!Number.isFinite(grade)) return null;
+  return grade <= 4 ? 2300 : 2600;
 };
 
 const extractTuitionAmountFromCode = (code) => {
@@ -253,7 +257,7 @@ function New_Invoices() {
     let updatedCodes;
 
     if (tuitionAmount !== null) {
-      if (tuitionAmount !== allowedAmount) {
+      if (allowedAmount !== null && tuitionAmount !== allowedAmount) {
         toast.error("Use the correct tuition amount for this class.");
         return;
       }

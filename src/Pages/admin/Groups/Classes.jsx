@@ -129,7 +129,7 @@ function Classes() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8 font-sans">
-      <div className="mx-auto w-full max-w-7xl space-y-8">
+      <div className="mx-auto w-full max-w-7xl ">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold text-slate-900">
             Academic Groups
