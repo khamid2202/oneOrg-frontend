@@ -2,29 +2,30 @@ import React, { useEffect, useState, useMemo } from "react";
 import { api } from "../../../Library/RequestMaker.jsx";
 import { endpoints } from "../../../Library/Endpoints.jsx";
 import { Loader2, AlertCircle, Upload } from "lucide-react";
+import MultiSelectDropdown from "../../../Layouts/MultiSelectDropdown.jsx";
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+const DAYS = ["Mon", "Tues", "Wed", "Thu", "Fri"];
 const DAY_MAP = {
-  Monday: 1,
-  Tuesday: 2,
-  Wednesday: 3,
-  Thursday: 4,
-  Friday: 5,
+  Mon: 1,
+  Tues: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
 };
+const DAY_BY_INDEX = Object.fromEntries(
+  Object.entries(DAY_MAP).map(([key, value]) => [value, key]),
+);
 
 function Timetable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [timetableData, setTimetableData] = useState([]);
-  const [groups, setGroups] = useState([]);
-  const [teachers, setTeachers] = useState([]);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   // Filters
-  const [academicYear, setAcademicYear] = useState("2025-2026");
-  const [viewMode, setViewMode] = useState("class"); // 'class' | 'teacher'
-  const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [selectedTeacherId, setSelectedTeacherId] = useState("");
-  const [dayFilter, setDayFilter] = useState("all"); // 'all' | day name
+  const [selectedGroupIds, setSelectedGroupIds] = useState([]);
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
+  const [selectedDays, setSelectedDays] = useState([]);
 
   // Upload state
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -36,36 +37,7 @@ function Timetable() {
   const [uploadResult, setUploadResult] = useState(null);
   const [uploadError, setUploadError] = useState("");
 
-  // Fetch groups and teachers on mount
   useEffect(() => {
-    const fetchBasics = async () => {
-      try {
-        const [groupsRes, teachersRes] = await Promise.all([
-          api.get(endpoints.GROUPS),
-          api.get(endpoints.TEACHERS),
-        ]);
-        setGroups(groupsRes.data?.groups || []);
-        const rawUsers = teachersRes.data?.users || teachersRes.data || [];
-        const onlyTeachers = rawUsers.filter((u) =>
-          Array.isArray(u.roles) ? u.roles.includes("teacher") : true,
-        );
-        setTeachers(onlyTeachers);
-      } catch (e) {
-        console.error("Failed to load basics", e);
-      }
-    };
-    fetchBasics();
-  }, []);
-
-  // Fetch timetable data when filters change
-  useEffect(() => {
-    // Don't fetch if teacher mode is selected but no teacher chosen
-    if (viewMode === "teacher" && !selectedTeacherId) {
-      setTimetableData([]);
-      setLoading(false);
-      return;
-    }
-
     // Set loading immediately when filters change
     setLoading(true);
 
@@ -73,25 +45,6 @@ function Timetable() {
       setError("");
       try {
         const params = { academic_year_id: 1 };
-
-        // Add filters based on view mode.
-        // Backend expects arrays with .length checks, so wrap in arrays.
-        if (viewMode === "class" && selectedGroupId) {
-          const groupIdNum = Number(selectedGroupId);
-          if (Number.isFinite(groupIdNum)) params.group_ids = [groupIdNum];
-        } else if (viewMode === "teacher" && selectedTeacherId) {
-          const teacherIdNum = Number(selectedTeacherId);
-          if (Number.isFinite(teacherIdNum))
-            params.teacher_ids = [teacherIdNum];
-        }
-
-        // Add day filter if specific day selected
-        if (dayFilter !== "all") {
-          const dayIndex = DAY_MAP[dayFilter];
-          if (dayIndex !== undefined && dayIndex !== null) {
-            params.days = [dayIndex];
-          }
-        }
 
         const timetableRes = await api.get(endpoints.TIMETABLE, params);
         const timetable = timetableRes.data?.timetable || [];
@@ -123,13 +76,131 @@ function Timetable() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [academicYear, viewMode, selectedGroupId, selectedTeacherId, dayFilter]);
+  }, [refreshToken]);
+
+  const getTeacherValue = (item) => {
+    const teacherId = item.teacher_id ?? item.teacher?.id;
+    if (teacherId !== undefined && teacherId !== null) {
+      return String(teacherId);
+    }
+    const teacherName =
+      typeof item.teacher === "string"
+        ? item.teacher
+        : item.teacher?.full_name || item.teacher?.name;
+    return teacherName ? `name:${teacherName.toLowerCase()}` : "";
+  };
+
+  const getClassLabel = (item) =>
+    item.class_pair ||
+    (item.grade != null && item.class != null
+      ? `${item.grade}-${item.class}`
+      : `Group ${item.group_id}`);
+
+  const classOptions = useMemo(() => {
+    const map = new Map();
+    timetableData.forEach((item) => {
+      if (item.group_id === undefined || item.group_id === null) return;
+      const value = String(item.group_id);
+      if (!map.has(value)) {
+        map.set(value, getClassLabel(item));
+      }
+    });
+    return Array.from(map, ([value, label]) => ({ value, label })).sort(
+      (a, b) => a.label.localeCompare(b.label),
+    );
+  }, [timetableData]);
+
+  const teacherOptions = useMemo(() => {
+    const map = new Map();
+    timetableData.forEach((item) => {
+      const value = getTeacherValue(item);
+      if (!value) return;
+      if (!map.has(value)) {
+        const teacherId = item.teacher_id ?? item.teacher?.id;
+        const teacherName =
+          typeof item.teacher === "string"
+            ? item.teacher
+            : item.teacher?.full_name || item.teacher?.name;
+        map.set(value, teacherName || `Teacher ${teacherId}`);
+      }
+    });
+    return Array.from(map, ([value, label]) => ({ value, label })).sort(
+      (a, b) => a.label.localeCompare(b.label),
+    );
+  }, [timetableData]);
+
+  const dayOptions = useMemo(() => {
+    const daySet = new Set();
+    timetableData.forEach((item) => {
+      const rawDay = item.day_index ?? DAY_MAP[item.day] ?? item.day;
+      const dayName = DAY_BY_INDEX[Number(rawDay)] || rawDay;
+      if (DAYS.includes(dayName)) daySet.add(dayName);
+    });
+    return DAYS.filter((day) => daySet.has(day));
+  }, [timetableData]);
+
+  useEffect(() => {
+    setSelectedGroupIds((prev) =>
+      prev.filter((id) => classOptions.some((option) => option.value === id)),
+    );
+  }, [classOptions]);
+
+  useEffect(() => {
+    setSelectedTeacherIds((prev) =>
+      prev.filter((id) => teacherOptions.some((option) => option.value === id)),
+    );
+  }, [teacherOptions]);
+
+  useEffect(() => {
+    setSelectedDays((prev) => prev.filter((day) => dayOptions.includes(day)));
+  }, [dayOptions]);
+
+  const filteredTimetableData = useMemo(() => {
+    let data = timetableData;
+
+    if (selectedGroupIds.length > 0) {
+      data = data.filter((item) =>
+        selectedGroupIds.includes(String(item.group_id ?? "")),
+      );
+    }
+
+    if (selectedTeacherIds.length > 0) {
+      data = data.filter((item) =>
+        selectedTeacherIds.includes(getTeacherValue(item)),
+      );
+    }
+
+    if (selectedDays.length > 0) {
+      data = data.filter((item) => {
+        const itemDayIndex = item.day_index ?? DAY_MAP[item.day] ?? item.day;
+        const itemDayName = DAY_BY_INDEX[Number(itemDayIndex)] || itemDayIndex;
+        return selectedDays.includes(itemDayName);
+      });
+    }
+
+    return data;
+  }, [timetableData, selectedGroupIds, selectedTeacherIds, selectedDays]);
+
+  const filteredDayOptions = useMemo(() => {
+    const daySet = new Set();
+    filteredTimetableData.forEach((item) => {
+      const rawDay = item.day_index ?? DAY_MAP[item.day] ?? item.day;
+      const dayName = DAY_BY_INDEX[Number(rawDay)] || rawDay;
+      if (DAYS.includes(dayName)) daySet.add(dayName);
+    });
+    return DAYS.filter((day) => daySet.has(day));
+  }, [filteredTimetableData]);
+
+  const selectedDaysSorted = useMemo(() => {
+    if (selectedDays.length === 0) return [];
+    return dayOptions.filter((day) => selectedDays.includes(day));
+  }, [dayOptions, selectedDays]);
 
   // Build grid structure: days × time slots × classes
   const { timeSlots, classesSorted, gridData } = useMemo(() => {
     // Extract unique time slots
     const timeSlotsMap = new Map();
-    timetableData.forEach((item) => {
+    filteredTimetableData.forEach((item) => {
       if (!timeSlotsMap.has(item.time_id)) {
         timeSlotsMap.set(item.time_id, {
           id: item.time_id,
@@ -145,7 +216,7 @@ function Timetable() {
 
     // Extract unique classes and sort them
     const classesMap = new Map();
-    timetableData.forEach((item) => {
+    filteredTimetableData.forEach((item) => {
       if (!classesMap.has(item.group_id)) {
         classesMap.set(item.group_id, {
           id: item.group_id,
@@ -164,13 +235,13 @@ function Timetable() {
 
     // Build grid: Map<day_timeId_groupId, lesson>
     const gridData = new Map();
-    timetableData.forEach((item) => {
+    filteredTimetableData.forEach((item) => {
       const key = `${item.day_index}_${item.time_id}_${item.group_id}`;
       gridData.set(key, item);
     });
 
     return { timeSlots, classesSorted, gridData };
-  }, [timetableData]);
+  }, [filteredTimetableData]);
 
   // Handle file upload
   const handleUpload = async () => {
@@ -200,8 +271,7 @@ function Timetable() {
         setStartDate("");
         setEndDate("");
         setUploadResult(null);
-        // Trigger refetch by updating a dependency
-        setAcademicYear(uploadAcademicYear);
+        setRefreshToken((prev) => prev + 1);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -222,7 +292,7 @@ function Timetable() {
         <div className="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-800">
-              Timetable - {academicYear}
+              Timetable
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               Weekly schedule for all classes
@@ -239,112 +309,50 @@ function Timetable() {
 
         {/* Filters - also fixed width */}
         <div className="bg-white border rounded-xl p-3 md:p-4 shadow-sm">
-          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-end flex-wrap">
-            {/* View mode toggle */}
-            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg w-full sm:w-fit">
-              <button
-                className={`flex-1 sm:flex-none px-3 py-2 rounded-md text-sm font-medium transition ${
-                  viewMode === "class"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-                onClick={() => {
-                  setViewMode("class");
-                  setSelectedTeacherId("");
-                }}
-              >
-                By Class
-              </button>
-              <button
-                className={`flex-1 sm:flex-none px-3 py-2 rounded-md text-sm font-medium transition ${
-                  viewMode === "teacher"
-                    ? "bg-white shadow text-gray-900"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-                onClick={() => {
-                  setViewMode("teacher");
-                  setSelectedGroupId("");
-                }}
-              >
-                By Teacher
-              </button>
-            </div>
-
-            {/* Academic year */}
-            <div className="flex flex-col w-full sm:w-auto">
-              <label className="text-xs text-gray-500 mb-1">
-                Academic Year
-              </label>
-              <input
-                value={academicYear}
-                onChange={(e) => setAcademicYear(e.target.value)}
-                className="px-3 py-2 border rounded-lg w-full sm:w-44 focus:ring-2 focus:ring-indigo-500 outline-none"
-                placeholder="2025-2026"
+          <div className="flex  gap-3 items-stretch lg:items-end flex-wrap">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-gray-500">Class</label>
+              <MultiSelectDropdown
+                label="All classes"
+                allSelectedLabel="All classes"
+                options={classOptions.map((option) => ({
+                  key: option.value,
+                  label: option.label,
+                }))}
+                selected={selectedGroupIds}
+                onChange={setSelectedGroupIds}
+                width="w-64"
+                activeColor="blue"
               />
             </div>
 
-            {/* Class or Teacher selector */}
-            {viewMode === "class" ? (
-              <div className="flex flex-col w-full sm:min-w-56 sm:w-auto">
-                <label className="text-xs text-gray-500 mb-1">Class</label>
-                <select
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  value={selectedGroupId}
-                  onChange={(e) => setSelectedGroupId(e.target.value)}
-                >
-                  <option value="">All classes</option>
-                  {groups
-                    .slice()
-                    .sort((a, b) =>
-                      `${a.grade}-${a.class}`.localeCompare(
-                        `${b.grade}-${b.class}`,
-                      ),
-                    )
-                    .map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.grade}-{g.class}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            ) : (
-              <div className="flex flex-col w-full sm:min-w-56 sm:w-auto">
-                <label className="text-xs text-gray-500 mb-1">Teacher</label>
-                <select
-                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  value={selectedTeacherId}
-                  onChange={(e) => setSelectedTeacherId(e.target.value)}
-                >
-                  <option value="">Select a teacher</option>
-                  {teachers
-                    .slice()
-                    .sort((a, b) =>
-                      (a.full_name || "").localeCompare(b.full_name || ""),
-                    )
-                    .map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.full_name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-gray-500">Teacher</label>
+              <MultiSelectDropdown
+                label="All teachers"
+                allSelectedLabel="All teachers"
+                options={teacherOptions.map((option) => ({
+                  key: option.value,
+                  label: option.label,
+                }))}
+                selected={selectedTeacherIds}
+                onChange={setSelectedTeacherIds}
+                width="w-64"
+                activeColor="blue"
+              />
+            </div>
 
-            {/* Day filter */}
-            <div className="flex flex-col w-full sm:w-auto">
-              <label className="text-xs text-gray-500 mb-1">Day</label>
-              <select
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                value={dayFilter}
-                onChange={(e) => setDayFilter(e.target.value)}
-              >
-                <option value="all">All days</option>
-                {DAYS.map((day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                ))}
-              </select>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs text-gray-500">Day</label>
+              <MultiSelectDropdown
+                label="All days"
+                allSelectedLabel="All days"
+                options={dayOptions}
+                selected={selectedDays}
+                onChange={setSelectedDays}
+                width="w-48"
+                activeColor="blue"
+              />
             </div>
           </div>
         </div>
@@ -372,21 +380,21 @@ function Timetable() {
                     Period
                   </th>
                   {/* Skeleton class headers - show 1 if class selected, otherwise 6 */}
-                  {Array.from({ length: selectedGroupId ? 1 : 6 }).map(
-                    (_, i) => (
-                      <th
-                        key={`skeleton-header-${i}`}
-                        className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r min-w-[180px]"
-                      >
-                        <div className="h-5 bg-gray-200 rounded animate-pulse mx-auto w-16"></div>
-                      </th>
-                    ),
-                  )}
+                  {Array.from({
+                    length: selectedGroupIds.length > 0 ? 1 : 6,
+                  }).map((_, i) => (
+                    <th
+                      key={`skeleton-header-${i}`}
+                      className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r min-w-[180px]"
+                    >
+                      <div className="h-5 bg-gray-200 rounded animate-pulse mx-auto w-16"></div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {/* Skeleton rows - show 1 day if day filter, otherwise 6 days */}
-                {Array.from({ length: dayFilter === "all" ? 6 : 1 }).map(
+                {Array.from({ length: selectedDays.length === 0 ? 6 : 1 }).map(
                   (_, dayIdx) =>
                     Array.from({ length: 6 }).map((_, slotIdx) => (
                       <tr
@@ -409,20 +417,20 @@ function Timetable() {
                         </td>
 
                         {/* Class cells - show 1 if class selected, otherwise 6 */}
-                        {Array.from({ length: selectedGroupId ? 1 : 6 }).map(
-                          (_, cellIdx) => (
-                            <td
-                              key={cellIdx}
-                              className="px-3 py-2 text-sm border-r align-top"
-                            >
-                              <div className="space-y-1">
-                                <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
-                                <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
-                              </div>
-                            </td>
-                          ),
-                        )}
+                        {Array.from({
+                          length: selectedGroupIds.length > 0 ? 1 : 6,
+                        }).map((_, cellIdx) => (
+                          <td
+                            key={cellIdx}
+                            className="px-3 py-2 text-sm border-r align-top"
+                          >
+                            <div className="space-y-1">
+                              <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+                              <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                              <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                            </div>
+                          </td>
+                        ))}
                       </tr>
                     )),
                 )}
@@ -452,9 +460,7 @@ function Timetable() {
                 <tr>
                   <td colSpan={8} className="px-8 py-16 text-center">
                     <div className="text-gray-500">
-                      {viewMode === "teacher" && !selectedTeacherId
-                        ? "Select a teacher to view their schedule"
-                        : `No timetable data available for ${academicYear}`}
+                      No timetable data available
                     </div>
                   </td>
                 </tr>
@@ -463,7 +469,10 @@ function Timetable() {
           ) : (
             <table className="w-full border-collapse">
               <tbody>
-                {(dayFilter === "all" ? DAYS : [dayFilter]).map((day) => {
+                {(selectedDays.length === 0
+                  ? filteredDayOptions
+                  : selectedDaysSorted
+                ).map((day) => {
                   const dayIndex = DAY_MAP[day];
                   return (
                     <React.Fragment key={day}>
@@ -491,7 +500,7 @@ function Timetable() {
                           className="border-b hover:bg-gray-50/50"
                         >
                           {/* Period column */}
-                          <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm text-gray-600 border-r sticky left-0 bg-white whitespace-nowrap">
+                          <td className="px-2  py-2  text-center md:text-sm text-gray-600 border-r sticky left-0 bg-white whitespace-nowrap">
                             <div className="font-medium">{timeSlot.slot}</div>
                           </td>
 
@@ -502,7 +511,7 @@ function Timetable() {
                             return (
                               <td
                                 key={`cell-${key}`}
-                                className="px-2 md:px-3 py-2 text-xs md:text-sm border-r align-top min-w-[140px] md:min-w-[180px]"
+                                className="px-2 md:px-3 py-2 text-xs md:text-sm border-r align-top min-w-[130px] "
                               >
                                 {lesson ? (
                                   <div className="space-y-1">
