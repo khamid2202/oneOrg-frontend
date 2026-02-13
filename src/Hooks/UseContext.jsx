@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,6 +10,10 @@ import { api } from "../Library/RequestMaker";
 import { endpoints } from "../Library/Endpoints";
 import toast from "react-hot-toast";
 import { useAuth } from "./AuthContext";
+import {
+  transformItem,
+  buildDerivedMaps,
+} from "../Pages/admin/Timetable/timetableUtils";
 
 const GlobalContext = createContext(null);
 
@@ -49,6 +54,12 @@ export const DataProvider = ({ children }) => {
   const [classesError, setClassesError] = useState(null);
   const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // ─── Timetable state ───
+  const [timetableData, setTimetableData] = useState([]);
+  const [timetableLoading, setTimetableLoading] = useState(true);
+  const [timetableError, setTimetableError] = useState("");
+  const [timetableRefreshToken, setTimetableRefreshToken] = useState(0);
 
   // Deduplicate students by student_id.
   const deduplicateRaw = (list) => {
@@ -259,7 +270,13 @@ export const DataProvider = ({ children }) => {
     fetchBillings();
     fetchClasses();
     fetchTeachers();
+    fetchTimetable();
   }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchTimetable();
+  }, [timetableRefreshToken]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -352,6 +369,32 @@ export const DataProvider = ({ children }) => {
       setClassesLoading(false);
     }
   };
+
+  // ─── Timetable fetch ───
+  const fetchTimetable = useCallback(async () => {
+    setTimetableLoading(true);
+    setTimetableError("");
+    try {
+      const res = await api.get(endpoints.TIMETABLE, { academic_year_id: 1 });
+      const raw = res.data?.timetable || [];
+      setTimetableData(raw.map(transformItem));
+    } catch (err) {
+      console.error(err);
+      setTimetableError("Failed to load timetable data");
+    } finally {
+      setTimetableLoading(false);
+    }
+  }, []);
+
+  const refreshTimetable = useCallback(
+    () => setTimetableRefreshToken((prev) => prev + 1),
+    [],
+  );
+
+  const timetableDerived = useMemo(
+    () => buildDerivedMaps(timetableData),
+    [timetableData],
+  );
 
   //TEACHERS
   const fetchTeachers = async () => {
@@ -458,6 +501,12 @@ export const DataProvider = ({ children }) => {
       fetchTeachers,
       normalizeDiscounts,
       normalizeInvoices,
+      // Timetable
+      timetableData,
+      timetableLoading,
+      timetableError,
+      timetableDerived,
+      refreshTimetable,
     }),
     [
       students,
@@ -487,6 +536,10 @@ export const DataProvider = ({ children }) => {
       classesError,
       teachers,
       searchTerm,
+      timetableData,
+      timetableLoading,
+      timetableError,
+      timetableDerived,
     ],
   );
 
