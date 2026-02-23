@@ -3,7 +3,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { CalendarDays } from "lucide-react";
-import html2canvas from "html2canvas";
 import toast from "react-hot-toast";
 import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 import { useGlobalContext } from "../../../../Hooks/UseContext.jsx";
@@ -201,6 +200,8 @@ function PointReport() {
 
     setCopyLoading(true);
     try {
+      const { default: html2canvas } = await import("html2canvas");
+
       // Temporarily remove overflow clipping so the full table is visible
       const overflowEls = tableRef.current.querySelectorAll(
         ".overflow-x-auto, .overflow-hidden",
