@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { api } from "../../../../Library/RequestMaker";
 import { endpoints } from "../../../../Library/Endpoints";
 import { useGlobalContext } from "../../../../Hooks/UseContext";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 
 const normalizeDiscount = (d = {}) => ({
   id: d.id ?? d.discount_id ?? d.uuid,
@@ -243,11 +244,11 @@ function Discounts() {
         }
       `}</style>
       <div className="max-w-6xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Discounts</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Create and manage student discounts.
-          </p>
+        <div className="relative">
+          <BackButton className="absolute left-0 top-0" />
+          <h1 className="text-center text-2xl font-semibold text-gray-900">
+            Discounts
+          </h1>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[360px,1fr]">

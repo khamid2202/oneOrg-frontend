@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Users, User, BarChart3 } from "lucide-react";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 import MultiSelectDropdown from "../../../../Layouts/MultiSelectDropdown.jsx";
 import { useGlobalContext } from "../../../../Hooks/UseContext.jsx";
 
@@ -96,9 +97,9 @@ function Classes() {
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8 font-sans">
       <div className="mx-auto w-full max-w-7xl space-y-4">
-        <div className="space-y-2">
+        <div className="relative flex items-center justify-center">
+          <BackButton className="absolute left-0" />
           <h1 className="text-3xl font-semibold text-slate-900">Classes</h1>
-          <p className="text-sm text-slate-600">Academic Year 2025-2026</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -195,14 +196,6 @@ function Classes() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      {/* <div
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${color}`}
-                      >
-                        {g.class_pair_compact || g.name}
-                        <span className="text-xs font-medium text-slate-500">
-                          Grade {g.grade}
-                        </span>
-                      </div> */}
                       <p className="text-sm text-slate-500">
                         {g.class_pair || g.name}
                       </p>
@@ -228,7 +221,6 @@ function Classes() {
                   </div>
 
                   <div className="mt-auto flex items-center justify-end pt-2 text-xs text-slate-500">
-                    {/*  */}
                     <button
                       type="button"
                       onClick={() =>

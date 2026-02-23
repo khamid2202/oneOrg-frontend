@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Trash2,
@@ -13,6 +13,7 @@ import AddStudentModal from "../Groups/AddStudentModal.jsx";
 import { api } from "../../../../Library/RequestMaker.jsx";
 import { endpoints } from "../../../../Library/Endpoints.jsx";
 import { useAuth } from "../../../../Hooks/AuthContext.jsx";
+import { useGlobalContext } from "../../../../Hooks/UseContext.jsx";
 
 function ClassManagement() {
   const location = useLocation();
@@ -30,30 +31,26 @@ function ClassManagement() {
 
   // Get role from AuthContext (verified by server)
   const { isTeacher } = useAuth();
-
-  const fetchStudents = useCallback(async () => {
-    if (!classInfo) return;
-    setLoading(true);
-    try {
-      const classPair = `${classInfo.grade}-${classInfo.class}`;
-      const filter = encodeURIComponent(
-        JSON.stringify({ class_pairs: [classPair] }),
-      );
-      const url = `${endpoints.STUDENTS}&filter=${filter}`;
-      const res = await api.get(url);
-      console.log("Fetched students for class:", res.data?.students || []);
-      setStudents(res.data?.students || []);
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [classInfo]);
+  const { fetchStudentsForClassGroup } = useGlobalContext();
 
   useEffect(() => {
     if (!classInfo) return;
-    fetchStudents();
-  }, [classInfo, fetchStudents]);
+
+    const loadStudents = async () => {
+      setLoading(true);
+      try {
+        const classStudents = await fetchStudentsForClassGroup(classInfo);
+        console.log("Fetched students for class:", classStudents);
+        setStudents(classStudents);
+      } catch (error) {
+        console.error("Failed to fetch students:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStudents();
+  }, [classInfo, fetchStudentsForClassGroup]);
 
   const stats = useMemo(() => {
     const total = students.length;

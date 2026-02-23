@@ -25,7 +25,7 @@ import AdminTools from "./Pages/admin/ManagementPage/AdminTools.jsx";
 import Discounts from "./Pages/admin/ManagementPage/Discounts/Discounts.jsx";
 import Billings from "./Pages/admin/ManagementPage/Billings/Billlings.jsx";
 import New_Invoices from "./Pages/admin/ManagementPage/Invoices2.0/New_Invoices_Page.jsx";
-import SensitiveTools from "./Pages/admin/ManagementPage/Constants/SensitiveTools.jsx";
+import PointReport from "./Pages/admin/ManagementPage/PointReport/PointReport.jsx";
 import PointExchange from "./Pages/admin/ManagementPage/PointExchange/PointExchange.jsx";
 
 function App() {
@@ -96,10 +96,7 @@ function App() {
               element={<PointExchange />}
             />
             <Route path="/management/invoices-2.0" element={<New_Invoices />} />
-            <Route
-              path="/management/sensitive-tools"
-              element={<SensitiveTools />}
-            />
+            <Route path="/management/point-report" element={<PointReport />} />
           </Route>
         </Routes>
       </Router>

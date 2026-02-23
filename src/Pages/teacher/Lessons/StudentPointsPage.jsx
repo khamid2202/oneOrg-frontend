@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   useLocation,
   useNavigate,
@@ -9,57 +9,91 @@ import { ArrowLeft, Loader, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { api } from "../../../Library/RequestMaker.jsx";
 
-const SCORE_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+function ScoreInput({ value, onSave, rowIndex, colIndex, saving, autoFocus }) {
+  const [localValue, setLocalValue] = useState(
+    value !== null && value !== undefined ? value : "",
+  );
+  const inputRef = useRef(null);
 
-function ScoreModal({ open, title, onClose, onSelect, loading }) {
-  if (!open) return null;
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      const timer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus]);
+
+  useEffect(() => {
+    setLocalValue(value !== null && value !== undefined ? value : "");
+  }, [value]);
+
+  const handleBlur = () => {
+    const parsed = localValue === "" ? null : Number(localValue);
+    if (parsed !== value) {
+      onSave(parsed);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    let nextRow = rowIndex;
+    let nextCol = colIndex;
+
+    if (e.key === "ArrowUp") {
+      nextRow = rowIndex - 1;
+    } else if (e.key === "ArrowDown" || e.key === "Enter") {
+      nextRow = rowIndex + 1;
+    } else if (e.key === "ArrowLeft") {
+      nextCol = colIndex - 1;
+    } else if (e.key === "ArrowRight") {
+      nextCol = colIndex + 1;
+    } else {
+      return;
+    }
+
+    e.preventDefault();
+    const nextInput = document.querySelector(
+      `input[data-row="${nextRow}"][data-col="${nextCol}"]`,
+    );
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.select();
+    } else if (e.key === "Enter") {
+      e.target.blur();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/40"
-        aria-label="Close"
-        onClick={onClose}
-        disabled={loading}
+    <div className="relative w-full max-w-[80px] mx-auto">
+      <input
+        ref={inputRef}
+        type="number"
+        min="0"
+        max="100"
+        data-row={rowIndex}
+        data-col={colIndex}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        disabled={saving}
+        className={`w-full h-10 px-2 text-center font-semibold text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+          saving
+            ? "bg-gray-100 text-gray-400 border-gray-200"
+            : localValue !== ""
+              ? "bg-blue-50 border-blue-300 text-blue-700"
+              : "bg-white border-gray-300 text-gray-900 hover:border-gray-400"
+        }`}
+        placeholder=""
       />
-
-      <div className="relative w-full max-w-sm rounded-xl bg-white shadow-xl border border-gray-200">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4 text-gray-600" />
-          </button>
+      {saving && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
+          <Loader className="w-4 h-4 animate-spin text-blue-600" />
         </div>
-
-        <div className="p-4">
-          <div className="grid grid-cols-5 gap-2">
-            {SCORE_OPTIONS.map((score) => (
-              <button
-                key={score}
-                type="button"
-                onClick={() => onSelect(score)}
-                disabled={loading}
-                className="h-10 rounded-lg border border-gray-200 bg-white text-gray-900 font-semibold hover:bg-gray-50 disabled:opacity-50"
-              >
-                {score}
-              </button>
-            ))}
-          </div>
-          {loading && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
-              <Loader className="w-4 h-4 animate-spin" />
-              Saving...
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -172,7 +206,7 @@ function StudentPointsPage() {
       let targetLesson = lessons[0];
       if (groupId) {
         const match = lessons.find(
-          (l) => String(l.group_id) === String(groupId)
+          (l) => String(l.group_id) === String(groupId),
         );
         if (match) targetLesson = match;
       }
@@ -232,19 +266,7 @@ function StudentPointsPage() {
     });
   }, [students, studentSearch]);
 
-  const openCell = (studentId, category) => {
-    setActiveCell({ studentId, category });
-  };
-
-  const closeModal = () => {
-    if (savingCellKey) return;
-    setActiveCell(null);
-  };
-
-  const saveScore = async (score) => {
-    if (!activeCell) return;
-
-    const { studentId, category } = activeCell;
+  const saveScore = async (studentId, category, score) => {
     const cellKey = `${studentId}:${category}`;
 
     if (!subjectId) {
@@ -279,6 +301,10 @@ function StudentPointsPage() {
           },
         }));
       } else {
+        if (score === null) {
+          setSavingCellKey(null);
+          return;
+        }
         const res = await api.post("/students/points", payload);
         const createdId = res?.data?.id ?? res?.data?.data?.id ?? null;
 
@@ -300,10 +326,8 @@ function StudentPointsPage() {
       }
 
       toast.success(
-        `${category === "homework" ? "Homework" : "Performance"} saved`
+        `${category === "homework" ? "Homework" : "Performance"} saved`,
       );
-
-      setActiveCell(null);
     } catch (err) {
       console.error("Failed to save score:", err);
       toast.error("Failed to save points");
@@ -312,20 +336,9 @@ function StudentPointsPage() {
     }
   };
 
-  const modalTitle = useMemo(() => {
-    if (!activeCell) return "";
-    return activeCell.category === "homework" ? "Homework" : "Performance";
-  }, [activeCell]);
-
-  const modalLoading = useMemo(() => {
-    if (!activeCell) return false;
-    const key = `${activeCell.studentId}:${activeCell.category}`;
-    return savingCellKey === key;
-  }, [activeCell, savingCellKey]);
-
   return (
-    <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto">
         <header className="mb-6">
           <div className="flex items-start gap-3">
             <button
@@ -390,23 +403,26 @@ function StudentPointsPage() {
         )}
 
         {!loading && filteredStudents.length > 0 && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm text-left">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50">
-                    <th className="px-4 py-3 text-left font-semibold text-gray-700 w-1/2">
-                      Student
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-4 py-3 font-semibold text-gray-700 w-12 text-center">
+                      No.
                     </th>
-                    <th className="px-4 py-3 text-center font-semibold text-gray-700 w-1/4">
+                    <th className="px-4 py-3 font-semibold text-gray-700">
+                      Student Name
+                    </th>
+                    <th className="px-4 py-3 font-semibold text-gray-700 w-32 text-center">
                       Homework
                     </th>
-                    <th className="px-4 py-3 text-center font-semibold text-gray-700 w-1/4">
+                    <th className="px-4 py-3 font-semibold text-gray-700 w-32 text-center">
                       Performance
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100">
                   {filteredStudents.map((student, index) => {
                     const studentId = student.student_id || student.id;
                     const studentName = getStudentName(student, index);
@@ -424,18 +440,21 @@ function StudentPointsPage() {
                     return (
                       <tr
                         key={studentId || index}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className="hover:bg-gray-50 transition-colors"
                       >
+                        <td className="px-4 py-3 text-center text-gray-500 font-medium">
+                          {index + 1}
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {student.picture ? (
                               <img
                                 src={student.picture}
                                 alt={studentName}
-                                className="w-9 h-9 rounded-full object-cover"
+                                className="w-8 h-8 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-semibold">
+                              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">
                                 {studentName.charAt(0).toUpperCase()}
                               </div>
                             )}
@@ -452,42 +471,29 @@ function StudentPointsPage() {
                           </div>
                         </td>
 
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => openCell(studentId, "homework")}
-                            disabled={homeworkSaving}
-                            className="inline-flex items-center justify-center min-w-16 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition font-semibold text-gray-900 disabled:opacity-50"
-                            aria-label={`Set homework points for ${studentName}`}
-                          >
-                            {homeworkSaving ? (
-                              <Loader className="w-4 h-4 animate-spin text-blue-600" />
-                            ) : homeworkValue !== null &&
-                              homeworkValue !== undefined ? (
-                              homeworkValue
-                            ) : (
-                              "—"
-                            )}
-                          </button>
+                        <td className="px-4 py-2 text-center">
+                          <ScoreInput
+                            value={homeworkValue}
+                            onSave={(val) =>
+                              saveScore(studentId, "homework", val)
+                            }
+                            rowIndex={index}
+                            colIndex={0}
+                            saving={homeworkSaving}
+                            autoFocus={index === 0}
+                          />
                         </td>
 
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => openCell(studentId, "performance")}
-                            disabled={performanceSaving}
-                            className="inline-flex items-center justify-center min-w-16 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition font-semibold text-gray-900 disabled:opacity-50"
-                            aria-label={`Set performance points for ${studentName}`}
-                          >
-                            {performanceSaving ? (
-                              <Loader className="w-4 h-4 animate-spin text-purple-600" />
-                            ) : performanceValue !== null &&
-                              performanceValue !== undefined ? (
-                              performanceValue
-                            ) : (
-                              "—"
-                            )}
-                          </button>
+                        <td className="px-4 py-2 text-center">
+                          <ScoreInput
+                            value={performanceValue}
+                            onSave={(val) =>
+                              saveScore(studentId, "performance", val)
+                            }
+                            rowIndex={index}
+                            colIndex={1}
+                            saving={performanceSaving}
+                          />
                         </td>
                       </tr>
                     );
@@ -512,14 +518,6 @@ function StudentPointsPage() {
             No students found for this class.
           </div>
         )}
-
-        <ScoreModal
-          open={!!activeCell}
-          title={modalTitle}
-          onClose={closeModal}
-          onSelect={saveScore}
-          loading={modalLoading}
-        />
       </div>
     </div>
   );

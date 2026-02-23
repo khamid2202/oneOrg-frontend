@@ -17,6 +17,45 @@ import {
 import { sendLogoutRequest } from "../Library/Authenticate.jsx";
 import { useAuth } from "../Hooks/AuthContext.jsx";
 
+export const getNavItems = (isAdmin, isTeacher) => {
+  const allItems = [
+    { to: "/home", icon: <Home size={20} />, label: "Home" },
+    { to: "/teachers", icon: <Users size={20} />, label: "Tutors" },
+    { to: "/timetable", icon: <Calendar size={20} />, label: "Timetable" },
+    {
+      to: "/management",
+      icon: <Wrench size={20} />,
+      label: "AdminTools",
+    },
+    {
+      to: "/new-payments",
+      icon: <CreditCard size={20} />,
+      label: "Payments",
+    },
+    {
+      to: "/teacher/lessons",
+      icon: <ClipboardPenLine size={20} />,
+      label: "Lessons",
+    },
+  ];
+
+  if (isAdmin) {
+    return allItems;
+  }
+
+  if (isTeacher) {
+    return allItems.filter(
+      (item) =>
+        item.to === "/home" ||
+        item.to === "/exams" ||
+        item.to === "/home/my-classes" ||
+        item.to === "/teacher/lessons",
+    );
+  }
+
+  return allItems.filter((item) => item.to === "/home" || item.to === "/exams");
+};
+
 function Navbar({ isExpanded, setIsExpanded }) {
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
@@ -32,64 +71,7 @@ function Navbar({ isExpanded, setIsExpanded }) {
   const fullName =
     user?.user?.full_name || user?.full_name || username || "User";
 
-  // Filter navItems based on user role
-  const getVisibleNavItems = () => {
-    const allItems = [
-      { to: "/home", icon: <Home size={20} />, label: "Home" },
-      { to: "/teachers", icon: <Users size={20} />, label: "Tutors" },
-      // {
-      //   to: "/classes-to-view",
-      //   icon: <BarChart2 size={20} />,
-      //   label: "Scores",
-      // },
-      { to: "/timetable", icon: <Calendar size={20} />, label: "Timetable" },
-
-      {
-        to: "/management",
-        icon: <Wrench size={20} />,
-        label: "AdminTools",
-      },
-      // { to: "/exams", icon: <ClipboardPenLine size={20} />, label: "Exams" },
-      {
-        to: "/new-payments",
-        icon: <CreditCard size={20} />,
-        label: "Payments",
-      },
-      // {
-      //   to: "/home/my-classes",
-      //   icon: <BookOpen size={20} />,
-      //   label: "Classes",
-      // },
-      {
-        to: "/teacher/lessons",
-        icon: <ClipboardPenLine size={20} />,
-        label: "Lessons",
-      },
-    ];
-
-    // If user is admin, show all items
-    if (isAdmin) {
-      return allItems;
-    }
-
-    // If user is only teacher (default), show only Home, My Classes, and Exams
-    if (isTeacher) {
-      return allItems.filter(
-        (item) =>
-          item.to === "/home" ||
-          item.to === "/exams" ||
-          item.to === "/home/my-classes" ||
-          item.to === "/teacher/lessons",
-      );
-    }
-
-    // Fallback: show only Home and Exams
-    return allItems.filter(
-      (item) => item.to === "/home" || item.to === "/exams",
-    );
-  };
-
-  const navItems = getVisibleNavItems();
+  const navItems = getNavItems(isAdmin, isTeacher);
 
   const handleLogOut = () => {
     setShowModal(true);
@@ -121,7 +103,7 @@ function Navbar({ isExpanded, setIsExpanded }) {
   return (
     <>
       <nav
-        className={`hidden md:flex flex-col bg-white border-r border-gray-200 h-screen shadow-md fixed left-0 top-0 z-40 transition-[width] duration-300 ease-in-out ${
+        className={`hidden md:flex flex-col flex-none bg-white border-r border-gray-200 h-full shadow-md z-40 transition-[width] duration-300 ease-in-out ${
           isExpanded ? "w-56" : "w-20"
         }`}
       >
@@ -232,47 +214,12 @@ function Navbar({ isExpanded, setIsExpanded }) {
           </div>
         </div>
         <div
-          className="ml-5 w-6 h-screen absolute right-0 top-0 "
+          className="ml-5 w-6 h-full absolute right-0 top-0 "
           onMouseEnter={handleToggleEnter}
           onMouseLeave={handleToggleLeave}
           aria-hidden="true"
         />
       </nav>
-
-      {/* Mobile bottom navigation (visible on small screens) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-        <div className="max-w-4xl mx-auto ">
-          <div className="flex items-center justify-between py-2">
-            {navItems.map((item) => {
-              const active = isActive(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`flex flex-col  items-center justify-center text-xs gap-1 w-1/6 py-1 transition`}
-                >
-                  <div
-                    className={`p-2 rounded-lg ${
-                      active
-                        ? "bg-white ring-2 ring-indigo-500 text-indigo-600 shadow"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {item.icon}
-                  </div>
-                  <span
-                    className={`${
-                      active ? "text-indigo-600 font-medium" : "text-gray-600"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
 
       {/* Logout Modal */}
       {showModal && (
@@ -302,6 +249,49 @@ function Navbar({ isExpanded, setIsExpanded }) {
         </div>
       )}
     </>
+  );
+}
+
+export function MobileNavbar() {
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path;
+  const { isAdmin, isTeacher } = useAuth();
+  const navItems = getNavItems(isAdmin, isTeacher);
+
+  return (
+    <div className="md:hidden bg-white border-t border-gray-200 z-50 w-full flex-none">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between py-2">
+          {navItems.map((item) => {
+            const active = isActive(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex flex-col items-center justify-center text-xs gap-1 w-1/6 py-1 transition`}
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    active
+                      ? "bg-white ring-2 ring-indigo-500 text-indigo-600 shadow"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {item.icon}
+                </div>
+                <span
+                  className={`${
+                    active ? "text-indigo-600 font-medium" : "text-gray-600"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 

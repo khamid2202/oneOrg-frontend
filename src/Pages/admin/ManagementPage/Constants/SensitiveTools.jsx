@@ -1,7 +1,20 @@
 import React from "react";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 
 function SensitiveTools() {
-  return <div>A Tool</div>;
+  return (
+    <div className="p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div>
+          <BackButton className="mb-2" label="Back to Management" />
+          <h1 className="text-2xl font-semibold text-gray-900">A Tool</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Access tools for critical operations.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default SensitiveTools;

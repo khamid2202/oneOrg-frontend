@@ -3,6 +3,7 @@ import { Button } from "@heroui/react";
 import toast from "react-hot-toast";
 import { api } from "../../../../Library/RequestMaker";
 import { endpoints } from "../../../../Library/Endpoints";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 
 const normalizeBilling = (b = {}) => ({
   id: b.id,
@@ -485,11 +486,9 @@ function Billings() {
         }
       `}</style>
       <div className="max-w-6xl mx-auto space-y-6">
-        <div>
+        <div className="relative flex items-center justify-center">
+          <BackButton className="absolute left-0" />
           <h1 className="text-2xl font-semibold text-gray-900">Billings</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Create and manage billing codes and amounts.
-          </p>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[360px,1fr]">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { api } from "../../../../Library/RequestMaker";
 import { endpoints } from "../../../../Library/Endpoints";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 
 function PointExchange() {
   const [query, setQuery] = useState("");
@@ -124,26 +125,9 @@ function PointExchange() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 p-4 pb-24   lg:p-8">
       <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          {/* <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-600 to-slate-800 shadow-lg shadow-slate-500/30">
-            <svg
-              className="h-8 w-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-              />
-            </svg>
-          </div> */}
-          <h1 className="text-2xl font-bold text-gray-900">
-            Convert points to dollars or vice versa
-          </h1>
+        <div className="relative mb-8 text-center">
+          <BackButton className="absolute left-0" />
+          <h1 className="text-2xl font-bold text-gray-900">Convert points</h1>
         </div>
 
         {/* Search Section */}

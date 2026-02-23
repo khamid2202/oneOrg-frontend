@@ -213,6 +213,32 @@ export const DataProvider = ({ children }) => {
       setLoadingMore(false);
     }
   };
+
+  const fetchStudentsForClass = useCallback(async (classInfo) => {
+    if (!classInfo) return [];
+
+    const classPair =
+      classInfo.class_pair ||
+      classInfo.name ||
+      (classInfo.grade != null && classInfo.class != null
+        ? `${classInfo.grade}-${classInfo.class}`
+        : "");
+
+    if (!classPair) return [];
+
+    try {
+      const filter = encodeURIComponent(
+        JSON.stringify({ class_pairs: [classPair] }),
+      );
+      const url = `${endpoints.GET_STUDENTS_WITH_POINTS}&filter=${filter}`;
+      const res = await api.get(url);
+      return res?.data?.students || [];
+    } catch (err) {
+      console.error("Failed to fetch students for class group:", err);
+      return [];
+    }
+  }, []);
+
   //DORM STUDENTS
   const fetchDormStudents = async (nextPage = 1, append = false) => {
     if (append) {
@@ -499,6 +525,7 @@ export const DataProvider = ({ children }) => {
       setSearchTerm,
       fetchClasses,
       fetchTeachers,
+      fetchStudentsForClassGroup: fetchStudentsForClass,
       normalizeDiscounts,
       normalizeInvoices,
       // Timetable
@@ -536,6 +563,7 @@ export const DataProvider = ({ children }) => {
       classesError,
       teachers,
       searchTerm,
+      fetchStudentsForClass,
       timetableData,
       timetableLoading,
       timetableError,

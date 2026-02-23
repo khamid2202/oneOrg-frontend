@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useGlobalContext } from "../../../../Hooks/UseContext";
 import { api } from "../../../../Library/RequestMaker";
 import { endpoints } from "../../../../Library/Endpoints";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 import InvoiceTable from "./InvoiceTable";
 import MobileCards from "./MobileCards";
 import CreateInvoiceModule from "./CreateInvoiceModule";
@@ -323,6 +324,7 @@ function New_Invoices() {
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
+      <BackButton className="mb-2" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">

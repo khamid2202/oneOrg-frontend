@@ -84,14 +84,16 @@ function AdminTools() {
             </div>
           </Link>
           <Link
-            to="/management/sensitive-tools"
+            to="/management/point-report"
             className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">A Tool</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Point Report
+                </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Access tools for critical operations.
+                  View detailed report of points of students.
                 </p>
               </div>
               <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
