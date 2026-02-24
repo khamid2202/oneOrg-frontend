@@ -382,7 +382,7 @@ function New_Invoices() {
             type="button"
             onClick={handleOpenCreateModal}
             disabled={creatingInvoices}
-            className={`inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 hover:bg-blue-700 sm:w-auto ${
+            className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600 sm:w-auto ${
               creatingInvoices ? "cursor-not-allowed opacity-70" : ""
             }`}
           >

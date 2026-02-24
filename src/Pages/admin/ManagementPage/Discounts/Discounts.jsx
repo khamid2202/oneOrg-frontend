@@ -279,7 +279,7 @@ function Discounts() {
                     <button
                       type="button"
                       onClick={() => searchStudents(searchQuery)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-gradient-to-r from-purple-600 to-purple-500 px-3 py-1 text-xs font-semibold text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600"
                     >
                       Search
                     </button>
@@ -463,7 +463,7 @@ function Discounts() {
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {submitting ? "Saving..." : "Create discount"}
                       </button>

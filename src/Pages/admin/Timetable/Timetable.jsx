@@ -84,7 +84,7 @@ function Timetable() {
           </div>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition whitespace-nowrap w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600 whitespace-nowrap w-full sm:w-auto"
           >
             <Upload size={18} />
             Upload Timetable

@@ -592,7 +592,7 @@ function Billings() {
                   type="submit"
                   isDisabled={submitting}
                   radius="full"
-                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600"
                 >
                   {submitting
                     ? "Saving..."

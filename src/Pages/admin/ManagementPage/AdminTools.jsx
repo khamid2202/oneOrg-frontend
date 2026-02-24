@@ -1,122 +1,74 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import {
+  FolderSearch,
+  Layers3,
+  BadgeDollarSign,
+  ReceiptText,
+  ChartColumnBig,
+  Repeat,
+} from "lucide-react";
 
 function AdminTools() {
+  const tools = [
+    {
+      to: "/management/classes",
+      title: "Classes",
+      icon: Layers3,
+    },
+    {
+      to: "/management/billings",
+      title: "Billings",
+      icon: BadgeDollarSign,
+    },
+    {
+      to: "/management/discounts",
+      title: "Discounts",
+      icon: FolderSearch,
+    },
+    {
+      to: "/management/invoices-2.0",
+      title: "Invoices",
+      icon: ReceiptText,
+    },
+    {
+      to: "/management/point-report",
+      title: "Point report",
+      icon: ChartColumnBig,
+    },
+    {
+      to: "/management/point-exchange",
+      title: "Exchange",
+      icon: Repeat,
+    },
+  ];
+
   return (
-    <div className="p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="p-6 bg-slate-100 min-h-[calc(100vh-84px)]">
+      <div className="mx-auto max-w-[1440px] space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Management</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Jump to billings, invoices, or discounts.
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Link
-            to="/management/classes"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Classes</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  View and manage classes.
-                </p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
-          <Link
-            to="/management/billings"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Billings
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Manage billing codes and amounts.
-                </p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
-          <Link
-            to="/management/discounts"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Discounts
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Manage discounts and related rules.
-                </p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
-          <Link
-            to="/management/invoices-2.0"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Invoices
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  New invoices management page.
-                </p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
-          <Link
-            to="/management/point-report"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Point Report
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  View detailed report of points of students.
-                </p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
-          <Link
-            to="/management/point-exchange"
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Points Exchange
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">Exchange points.</p>
-              </div>
-              <span className="text-blue-600 font-medium opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
-            </div>
-          </Link>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+
+            return (
+              <Link
+                key={tool.to}
+                to={tool.to}
+                className="group flex min-h-[180px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white  text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <span className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all group-hover:from-purple-700 group-hover:to-purple-600">
+                  <Icon size={28} strokeWidth={2} />
+                </span>
+                <span className="text-[36px] leading-none font-semibold text-slate-800 sm:text-xl lg:text-xl">
+                  {tool.title}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
