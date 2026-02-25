@@ -47,7 +47,9 @@ function AdminTools() {
     <div className="p-6 bg-slate-100 min-h-[calc(100vh-84px)]">
       <div className="mx-auto max-w-[1440px] space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <h1 className="text-4xl text-center font-bold text-gray-900">
+            Tools
+          </h1>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -63,7 +65,7 @@ function AdminTools() {
                 <span className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all group-hover:from-purple-700 group-hover:to-purple-600">
                   <Icon size={28} strokeWidth={2} />
                 </span>
-                <span className="text-[36px] leading-none font-semibold text-slate-800 sm:text-xl lg:text-xl">
+                <span className="text-[16px] leading-none font-semibold text-slate-800 ">
                   {tool.title}
                 </span>
               </Link>

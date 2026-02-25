@@ -5,13 +5,12 @@ import {
   BookOpen,
   CreditCard,
   Users,
+  User,
   BarChart2,
   Calendar,
-  Settings,
   Wrench,
   ChevronLeft,
   ChevronRight,
-  LogOut,
   ClipboardPenLine,
 } from "lucide-react";
 import { sendLogoutRequest } from "../Library/Authenticate.jsx";
@@ -59,7 +58,6 @@ export const getNavItems = (isAdmin, isTeacher) => {
 function Navbar({ isExpanded, setIsExpanded }) {
   const location = useLocation();
   const [showModal, setShowModal] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showToggle, setShowToggle] = useState(false);
   const [showText, setShowText] = useState(isExpanded);
 
@@ -74,17 +72,8 @@ function Navbar({ isExpanded, setIsExpanded }) {
   const navItems = getNavItems(isAdmin, isTeacher);
 
   const handleLogOut = () => {
+    // kept for backward compatibility if other code uses it
     setShowModal(true);
-    setShowSettings(false);
-  };
-
-  const confirmLogout = () => {
-    setShowModal(false);
-    logout(); // This now handles everything including redirect
-  };
-
-  const cancelLogout = () => {
-    setShowModal(false);
   };
 
   const handleToggleEnter = () => setShowToggle(true);
@@ -110,7 +99,7 @@ function Navbar({ isExpanded, setIsExpanded }) {
         <div className="flex flex-col h-full w-full relative">
           {/* Collapse / Expand Button */}
           <div
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-50"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-50 h-full flex items-center"
             onMouseEnter={handleToggleEnter}
             onMouseLeave={handleToggleLeave}
           >
@@ -130,8 +119,14 @@ function Navbar({ isExpanded, setIsExpanded }) {
 
           {/* Top Section */}
 
-          {/* Logo Section */}
-          <div className="flex flex-row items-center gap-2 px-3 py-6 border-b">
+          {/* Logo Section as Button */}
+          <Link
+            className="flex flex-row items-center gap-2 px-3 py-6 border-b w-full focus:outline-none hover:bg-gray-50 transition"
+            to="/user-profile"
+            type="button"
+            tabIndex={0}
+            aria-label="Go to profile"
+          >
             <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex justify-center items-center text-white text-lg font-bold">
               {firstLetter}
             </div>
@@ -144,7 +139,7 @@ function Navbar({ isExpanded, setIsExpanded }) {
                 {fullName}
               </h1>
             </div>
-          </div>
+          </Link>
 
           {/* Nav Links */}
           <div className="flex flex-col mt-2 space-y-1 overflow-y-auto scrollbar-hide">
@@ -170,48 +165,8 @@ function Navbar({ isExpanded, setIsExpanded }) {
             ))}
           </div>
 
-          {/* Bottom Section */}
-          <div className="p-4 border-t flex justify-between items-center mt-auto">
-            {/* Settings Button */}
-            <button
-              className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 font-semibold hover:from-gray-300 hover:to-gray-400 transition flex items-center"
-              onClick={() => setShowSettings((prev) => !prev)}
-            >
-              <Settings size={20} className="flex-shrink-0" />
-              <span
-                className={`whitespace-nowrap transition-opacity duration-300 ${
-                  isExpanded && showText
-                    ? "opacity-100 ml-2"
-                    : "opacity-0 w-0 overflow-hidden ml-0"
-                }`}
-              >
-                Settings
-              </span>
-            </button>
-
-            {/* Settings Dropdown */}
-            {showSettings && (
-              <div
-                className={`bg-white absolute left-0 bottom-16 border border-gray-200 rounded-xl shadow-lg py-1 px-1 z-50 flex flex-col items-center ${
-                  isExpanded ? "w-full" : "w-20"
-                }`}
-              >
-                <button
-                  className="w-11/12 flex items-center gap-2 px-4 py-1 rounded-lg hover:bg-gray-100 transition text-gray-700"
-                  onClick={handleLogOut}
-                >
-                  <LogOut size={20} className="flex-shrink-0" />
-                  <span
-                    className={`whitespace-nowrap transition-opacity duration-300 ${
-                      isExpanded && showText ? "opacity-100" : "opacity-0"
-                    } ${!isExpanded ? "w-0 overflow-hidden" : ""}`}
-                  >
-                    Log Out
-                  </span>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Bottom spacer (settings moved to Profile) */}
+          <div className="p-4 mt-auto" />
         </div>
         <div
           className="ml-5 w-6 h-full absolute right-0 top-0 "
@@ -255,12 +210,13 @@ function Navbar({ isExpanded, setIsExpanded }) {
 export function MobileNavbar() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
-  const { isAdmin, isTeacher } = useAuth();
+  const { isAdmin, isTeacher, username } = useAuth();
   const navItems = getNavItems(isAdmin, isTeacher);
+  const firstLetter = username ? username.charAt(0).toUpperCase() : "U";
 
   return (
     <div className="md:hidden bg-white border-t border-gray-200 z-50 w-full flex-none">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto relative">
         <div className="flex items-center justify-between py-2">
           {navItems.map((item) => {
             const active = isActive(item.to);
@@ -273,22 +229,57 @@ export function MobileNavbar() {
                 <div
                   className={`p-2 rounded-lg ${
                     active
-                      ? "bg-white ring-2 ring-indigo-500 text-indigo-600 shadow"
+                      ? "bg-purple-100 text-purple-700 shadow-inner"
                       : "text-gray-600"
                   }`}
                 >
-                  {item.icon}
+                  <div
+                    className={`w-7 h-7 flex items-center justify-center rounded-full ${
+                      active
+                        ? "bg-gradient-to-br from-purple-600 to-purple-500 text-white"
+                        : "bg-transparent text-current"
+                    }`}
+                  >
+                    {item.icon}
+                  </div>
                 </div>
                 <span
-                  className={`${
-                    active ? "text-indigo-600 font-medium" : "text-gray-600"
-                  }`}
+                  className={`${active ? "text-purple-600 font-medium" : "text-gray-600"}`}
                 >
                   {item.label}
                 </span>
               </Link>
             );
           })}
+          {/* Profile nav item */}
+          {(() => {
+            const profileActive = isActive("/user-profile");
+            return (
+              <Link
+                to="/user-profile"
+                className={`flex flex-col items-center justify-center text-xs gap-1 w-1/6 py-1 transition`}
+              >
+                <div
+                  className={`p-2 rounded-lg ${
+                    profileActive
+                      ? "bg-purple-100 text-purple-700 shadow-inner"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <div
+                    className={`w-7 h-7 flex items-center justify-center rounded-full ${profileActive ? "bg-gradient-to-br from-purple-600 to-purple-500 text-white" : "bg-transparent text-current"}`}
+                  >
+                    <User size={16} />
+                  </div>
+                </div>
+                <span
+                  className={`${profileActive ? "text-purple-600 font-medium" : "text-gray-600"}`}
+                >
+                  Profile
+                </span>
+              </Link>
+            );
+          })()}
         </div>
       </div>
     </div>

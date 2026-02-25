@@ -4,6 +4,7 @@ export const endpoints = {
   // Auth
   SIGN_IN: `/auth/signin`,
   SIGN_UP: `/auth/signup`,
+  UPDATE_PASSWORD: `/settings/password`,
   VALIDATE: `/auth/validate`,
   USER: `/users/me`,
   REVOKE: `/auth/revoke`,

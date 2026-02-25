@@ -27,6 +27,7 @@ import Billings from "./Pages/admin/ManagementPage/Billings/Billlings.jsx";
 import New_Invoices from "./Pages/admin/ManagementPage/Invoices2.0/New_Invoices_Page.jsx";
 import PointReport from "./Pages/admin/ManagementPage/PointReport/PointReport.jsx";
 import PointExchange from "./Pages/admin/ManagementPage/PointExchange/PointExchange.jsx";
+import Profile from "./Pages/teacher/Profile/Profile.jsx";
 
 function App() {
   return (
@@ -97,6 +98,7 @@ function App() {
             />
             <Route path="/management/invoices-2.0" element={<New_Invoices />} />
             <Route path="/management/point-report" element={<PointReport />} />
+            <Route path="/user-profile" element={<Profile />} />
           </Route>
         </Routes>
       </Router>

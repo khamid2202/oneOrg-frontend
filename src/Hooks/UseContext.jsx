@@ -49,6 +49,7 @@ export const DataProvider = ({ children }) => {
 
   const [selectedPurpose, setSelectedPurpose] = useState("tuition");
   const [billings, setBillings] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
   const [classes, setClasses] = useState([]);
   const [classesLoading, setClassesLoading] = useState(false);
   const [classesError, setClassesError] = useState(null);
@@ -359,6 +360,25 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  //fetch user info for profile page
+  const fetchUserInfo = async () => {
+    try {
+      const response = await api.get(endpoints.USER);
+      const u = response.data.user || null;
+      setUserInfo(u);
+      return u;
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      return null;
+    }
+  };
+
+  // Fetch basic user info when provider mounts
+  useEffect(() => {
+    fetchUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   //CLASSES
   const fetchClasses = async () => {
     setClassesLoading(true);
@@ -516,6 +536,8 @@ export const DataProvider = ({ children }) => {
       billings,
       notifyBillingUpdate,
       notifyInvoiceCreated,
+      user: userInfo,
+      fetchUserInfo,
       setClasses,
       classes,
       classesLoading,
@@ -568,6 +590,8 @@ export const DataProvider = ({ children }) => {
       timetableLoading,
       timetableError,
       timetableDerived,
+      userInfo,
+      fetchUserInfo,
     ],
   );
 

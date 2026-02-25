@@ -197,7 +197,7 @@ function ClassManagement() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto w-full max-w-7xl ">
+      <div className="mx-auto w-full max-w-7xl space-y-2">
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-indigo-700">
