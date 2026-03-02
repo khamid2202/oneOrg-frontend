@@ -14,7 +14,7 @@ const normalizeStudents = (classInfo) => {
   if (Array.isArray(classInfo.studentList)) {
     console.log(
       "Normalizing students from studentList:",
-      classInfo.studentList
+      classInfo.studentList,
     );
     return classInfo.studentList;
   }
@@ -93,7 +93,7 @@ function ClassSubjects() {
     if (!subjectId) {
       console.warn(
         "Cannot fetch points: subject ID not available. Subject:",
-        subject
+        subject,
       );
       return;
     }
@@ -103,9 +103,9 @@ function ClassSubjects() {
       // Build the URL: /students/points?class_pairs=["4-A"]&subject_id=9
       const classPairsParam = encodeURIComponent(JSON.stringify([classPair]));
       const url = `${
-        endpoints.GET_LESSON_POINTS
+        endpoints.GET_POINTS
       }?class_pairs=${classPairsParam}&subject_id=${encodeURIComponent(
-        subjectId
+        subjectId,
       )}`;
       const response = await api.get(url);
       console.log("Lesson points response:", response);

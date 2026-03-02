@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../Library/Endpoints.jsx";
+import { useGlobalContext } from "../../../../Hooks/UseContext.jsx";
 import {
   Users,
   User,
@@ -11,6 +10,7 @@ import {
   Mail,
   X,
 } from "lucide-react";
+import BackButton from "../../../../Layouts/Buttons/BackButton.jsx";
 
 // Local Components
 import TeacherCard from "./TeacherCard.jsx";
@@ -21,63 +21,27 @@ import AddTeacherModal from "./AddModule.jsx";
  * Main page for viewing, creating, and managing teachers
  */
 function Teachers() {
-  const [teachers, setTeachers] = useState([]);
-  const [filteredTeachers, setFilteredTeachers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const {
+    teachers,
+    filteredTeachers,
+    teachersLoading,
+    fetchTeachers,
+    searchTerm,
+    setSearchTerm,
+  } = useGlobalContext();
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [viewingTeacher, setViewingTeacher] = useState(null);
 
-  // Data Fetching
-
+  // Data Fetching (delegated to global context)
   useEffect(() => {
     fetchTeachers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchTeachers = async () => {
-    try {
-      const res = await api.get(
-        endpoints.TEACHERS,
-        {},
-        { withCredentials: true },
-      );
-
-      if (res.data && Array.isArray(res.data.users)) {
-        setTeachers(res.data.users);
-        setFilteredTeachers(res.data.users);
-        localStorage.setItem("teachers", JSON.stringify(res.data.users));
-      } else {
-        setTeachers([]);
-        setFilteredTeachers([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch teachers:", error);
-      setTeachers([]);
-      setFilteredTeachers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Search Filter
-  useEffect(() => {
-    if (!search.trim()) {
-      setFilteredTeachers(teachers);
-      return;
-    }
-
-    const lowerSearch = search.toLowerCase();
-    setFilteredTeachers(
-      teachers.filter(
-        (teacher) =>
-          teacher.full_name?.toLowerCase().includes(lowerSearch) ||
-          teacher.username?.toLowerCase().includes(lowerSearch),
-      ),
-    );
-  }, [search, teachers]);
+  // Search handled by global context (searchTerm + filteredTeachers)
 
   // Modal Handlers
   const handleAddModalClose = () => {
@@ -85,9 +49,10 @@ function Teachers() {
     setEditingTeacher(null);
   };
 
-  const handleModalSuccess = (updatedTeachers) => {
-    setTeachers(updatedTeachers);
-    setFilteredTeachers(updatedTeachers);
+  const handleModalSuccess = () => {
+    // Refresh teacher list from server after add/edit
+    fetchTeachers();
+    handleAddModalClose();
   };
 
   const handleViewTeacher = (teacher) => setViewingTeacher(teacher);
@@ -99,7 +64,7 @@ function Teachers() {
   ).length;
 
   // Loading State
-  if (loading) {
+  if (teachersLoading) {
     return (
       <div className="p-8 bg-gray-50 min-h-screen">
         <div className="text-lg text-gray-600">Loading teachers...</div>
@@ -112,10 +77,10 @@ function Teachers() {
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Page Header */}
       <div className="mb-6 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">All Teachers</h1>
-          <p className="text-gray-500 mt-1">Browse all teaching staff</p>
-        </div>
+        <BackButton />
+
+        <h1 className="text-2xl font-semibold text-gray-800">All Teachers</h1>
+
         <button
           onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all hover:from-purple-700 hover:to-purple-600 whitespace-nowrap"
@@ -126,11 +91,11 @@ function Teachers() {
       </div>
 
       {/* Search Input */}
-      <div className="mb-6">
+      <div className="flex justify-center mb-2">
         <input
           type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search teachers..."
           className="w-full sm:w-96 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
         />
@@ -182,10 +147,6 @@ function Teachers() {
     </div>
   );
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// Sub-Components
-// ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * Summary statistics cards
@@ -254,6 +215,7 @@ function ViewTeacherModal({ teacher, onClose, onEdit }) {
         {/* Header */}
         <div className="p-6 border-b flex items-start justify-between">
           <div>
+            f
             <h2 className="text-2xl font-semibold text-gray-800">
               {teacher.full_name || teacher.username}
             </h2>

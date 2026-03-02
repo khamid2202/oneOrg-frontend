@@ -7,6 +7,7 @@ import {
   ReceiptText,
   ChartColumnBig,
   Repeat,
+  Users,
 } from "lucide-react";
 
 function AdminTools() {
@@ -15,6 +16,11 @@ function AdminTools() {
       to: "/management/classes",
       title: "Classes",
       icon: Layers3,
+    },
+    {
+      to: "/teachers",
+      title: "Tutors",
+      icon: Users,
     },
     {
       to: "/management/billings",

@@ -19,7 +19,6 @@ import { useAuth } from "../Hooks/AuthContext.jsx";
 export const getNavItems = (isAdmin, isTeacher) => {
   const allItems = [
     { to: "/home", icon: <Home size={20} />, label: "Home" },
-    { to: "/teachers", icon: <Users size={20} />, label: "Tutors" },
     { to: "/timetable", icon: <Calendar size={20} />, label: "Timetable" },
     {
       to: "/management",

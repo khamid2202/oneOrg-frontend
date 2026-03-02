@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Loader2, AlertCircle, X } from "lucide-react";
-import { api } from "../../../Library/RequestMaker.jsx";
-import { endpoints } from "../../../Library/Endpoints.jsx";
+import { api } from "../../../../Library/RequestMaker.jsx";
+import { endpoints } from "../../../../Library/Endpoints.jsx";
 
 /**
  * Initial form state for creating/editing a teacher
@@ -41,6 +41,7 @@ const PERMISSION_OPTIONS = [
   "can_view_wallet",
   "view_homework_reports",
   "can_teach",
+  "can_view_points",
 ];
 
 /**

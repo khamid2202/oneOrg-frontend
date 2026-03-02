@@ -10,7 +10,7 @@ import LandingPage from "./Pages/admin/LandingPage/LandingPage";
 import LayoutWithHeader from "./Layouts/Layout";
 import ProtectedRoute from "./Pages/auth/ProtectedRoute";
 import Classes from "./Pages/admin/ManagementPage/Groups/Classes.jsx";
-import Teachers from "./Pages/admin/Teachers/Teachers.jsx";
+import Teachers from "./Pages/admin/ManagementPage/Teachers/Teachers.jsx";
 import ClassManagement from "./Pages/admin/ManagementPage/Groups/ClassManagement.jsx";
 import Timetable from "./Pages/admin/Timetable/Timetable";
 import Exams from "./Pages/admin/Exams/Exams.jsx";

@@ -41,7 +41,7 @@ function Profile() {
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center py-10">
       <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl flex flex-col md:flex-row overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-full md:w-80 bg-white border-r border-gray-100 flex flex-col items-center py-10 px-6 gap-8">
+        <aside className="w-full md:w-80 bg-white border-r border-gray-100 flex flex-col items-center justify-between py-10 px-6 gap-8">
           {/* Avatar */}
           <div className="relative flex flex-col items-center">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-400 flex items-center justify-center text-white text-5xl font-bold mb-2">
@@ -78,20 +78,20 @@ function Profile() {
           {/* Log out button moved from Navbar */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full inline-flex items-center justify-center rounded-lg bg-white border mt-3 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+            className="w-full inline-flex items-center justify-center rounded-lg bg-white border mt-auto px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
           >
             Log Out
           </button>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 md:p-12 flex flex-col gap-8">
+        <main className="flex-1 p-8 md:p-12 flex flex-col gap-4">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               My Profile
             </h2>
-            <div className="text-gray-500 mb-6">Personal Information</div>
-            <div className="bg-white rounded-2xl shadow p-6 mb-8">
+            <div className="text-gray-500 mb-2">Personal Information</div>
+            <div className="bg-white rounded-2xl shadow p-6 ">
               {showReset ? (
                 <PasswordChangeModule onCancel={() => setShowReset(false)} />
               ) : (
@@ -152,8 +152,12 @@ function Profile() {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white rounded-xl shadow-lg p-8 min-w-[300px] flex flex-col items-center">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">Confirm Logout</h2>
-            <p className="mb-6 text-gray-600">Are you sure you want to log out?</p>
+            <h2 className="text-lg font-bold mb-4 text-gray-800">
+              Confirm Logout
+            </h2>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to log out?
+            </p>
             <div className="flex gap-4">
               <button
                 className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"

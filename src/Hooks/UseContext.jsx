@@ -54,6 +54,8 @@ export const DataProvider = ({ children }) => {
   const [classesLoading, setClassesLoading] = useState(false);
   const [classesError, setClassesError] = useState(null);
   const [teachers, setTeachers] = useState([]);
+  const [filteredTeachers, setFilteredTeachers] = useState([]);
+  const [teachersLoading, setTeachersLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   // ─── Timetable state ───
@@ -296,7 +298,6 @@ export const DataProvider = ({ children }) => {
     if (!isAdmin) return;
     fetchBillings();
     fetchClasses();
-    fetchTeachers();
     fetchTimetable();
   }, [isAdmin]);
 
@@ -443,16 +444,48 @@ export const DataProvider = ({ children }) => {
   );
 
   //TEACHERS
+
   const fetchTeachers = async () => {
+    setTeachersLoading(true);
     try {
-      const response = await api.get(endpoints.GET_TEACHERS_WHO_CAN_TEACH);
-      const teachersList = response.data.users || response.data.teachers || [];
-      setTeachers(teachersList);
+      const res = await api.get(
+        endpoints.TEACHERS,
+        {},
+        { withCredentials: true },
+      );
+
+      if (res.data && Array.isArray(res.data.users)) {
+        setTeachers(res.data.users);
+        setFilteredTeachers(res.data.users);
+        localStorage.setItem("teachers", JSON.stringify(res.data.users));
+      } else {
+        setTeachers([]);
+        setFilteredTeachers([]);
+      }
     } catch (error) {
-      console.error("Error fetching teachers:", error);
+      console.error("Failed to fetch teachers:", error);
       setTeachers([]);
+      setFilteredTeachers([]);
+    } finally {
+      setTeachersLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredTeachers(teachers);
+      return;
+    }
+
+    const lowerSearch = searchTerm.toLowerCase();
+    setFilteredTeachers(
+      teachers.filter(
+        (teacher) =>
+          teacher.full_name?.toLowerCase().includes(lowerSearch) ||
+          teacher.username?.toLowerCase().includes(lowerSearch),
+      ),
+    );
+  }, [searchTerm, teachers]);
 
   const notifyBillingUpdate = (studentName) => {
     if (!studentName) return;
@@ -543,10 +576,12 @@ export const DataProvider = ({ children }) => {
       classesLoading,
       classesError,
       teachers,
+      filteredTeachers,
+      teachersLoading,
+      fetchTeachers,
       searchTerm,
       setSearchTerm,
       fetchClasses,
-      fetchTeachers,
       fetchStudentsForClassGroup: fetchStudentsForClass,
       normalizeDiscounts,
       normalizeInvoices,

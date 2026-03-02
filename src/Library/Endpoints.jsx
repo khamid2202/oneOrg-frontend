@@ -52,7 +52,7 @@ export const endpoints = {
   GET_DATA_FROM_TIMETABLE: `/timetable?academic_year_id=1`,
 
   // Scores and Points
-  GET_LESSON_POINTS: `/students/points`,
+  GET_POINTS: `/students/points`,
   EXCHANGE_POINTS_BULK: `/students/points/bulk`,
   ACADEMIC_YEARS: `/academic-years`,
   SUBJECTS: `/subjects`,
