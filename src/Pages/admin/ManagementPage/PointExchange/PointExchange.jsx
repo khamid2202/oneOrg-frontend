@@ -14,6 +14,7 @@ function PointExchange() {
   const [exchangeRate, setExchangeRate] = useState("10");
   const [dollarAmount, setDollarAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -134,6 +135,15 @@ function PointExchange() {
               <h1 className="text-2xl font-bold text-gray-900">
                 Convert points
               </h1>
+              <div className="absolute right-0 top-0">
+                <button
+                  type="button"
+                  onClick={() => setShowHistory((s) => !s)}
+                  className="ml-3 inline-flex items-center gap-2 rounded-md border px-3 py-1 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  {showHistory ? "Hide History" : "Show History"}
+                </button>
+              </div>
             </div>
 
             {/* Search Section */}
@@ -258,9 +268,40 @@ function PointExchange() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto">
-            <ExchangeHistory />
-          </div>
+          {showHistory && (
+            <div className="fixed inset-0 z-40 flex items-stretch">
+              <div
+                className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-sm"
+                onClick={() => setShowHistory(false)}
+              />
+              <div className="relative ml-auto h-full w-full md:w-2/5 lg:w-1/3 bg-white shadow-xl overflow-auto">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Exchange History</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowHistory(false)}
+                    className="inline-flex items-center justify-center rounded-md p-2 text-gray-600 hover:bg-gray-50"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div className="h-[calc(100%-56px)]">
+                  <ExchangeHistory />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

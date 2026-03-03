@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { api } from "../../../Library/RequestMaker.jsx";
 import { endpoints } from "../../../Library/Endpoints.jsx";
 
-export default function PasswordChangeModule({ onCancel }) {
+export default function PasswordChangeModule({ onCancel, modal = true }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -50,14 +50,29 @@ export default function PasswordChangeModule({ onCancel }) {
     }
   };
 
-  return (
+  const formCard = (
     <div className="bg-white rounded-2xl shadow p-6">
       <h3 className="text-lg font-semibold mb-4">Reset Password</h3>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+        {/* Hidden fields to prevent browser autofill */}
+        <input
+          type="text"
+          name="__fake_username"
+          autoComplete="username"
+          style={{ display: "none" }}
+        />
+        <input
+          type="password"
+          name="__fake_password"
+          autoComplete="current-password"
+          style={{ display: "none" }}
+        />
         <div>
           <label className="text-sm text-gray-600">Current password</label>
           <input
             type="password"
+            name="current-password"
+            autoComplete="current-password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -69,6 +84,8 @@ export default function PasswordChangeModule({ onCancel }) {
           <label className="text-sm text-gray-600">New password</label>
           <input
             type="password"
+            name="new-password"
+            autoComplete="new-password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -80,6 +97,8 @@ export default function PasswordChangeModule({ onCancel }) {
           <label className="text-sm text-gray-600">Confirm new password</label>
           <input
             type="password"
+            name="confirm-new-password"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -104,6 +123,14 @@ export default function PasswordChangeModule({ onCancel }) {
           </button>
         </div>
       </form>
+    </div>
+  );
+
+  if (!modal) return formCard;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md">{formCard}</div>
     </div>
   );
 }

@@ -99,7 +99,7 @@ function ExchangeHistory() {
     );
 
   return (
-    <div className="mx-auto max-w-7xl pt-5">
+    <div className="mx-auto flex flex-col items-center justify-center max-w-7xl pt-5">
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>

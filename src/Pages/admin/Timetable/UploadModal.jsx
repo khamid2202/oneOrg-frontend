@@ -5,15 +5,13 @@ import { Loader2, AlertCircle, Upload } from "lucide-react";
 
 export default function UploadModal({ onClose, onSuccess }) {
   const [file, setFile] = useState(null);
-  const [academicYear, setAcademicYear] = useState("2025-2026");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [academicYearID, setAcademicYearID] = useState("1");
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
   const handleUpload = async () => {
-    if (!file || !academicYear || !startDate) {
+    if (!file || !academicYearID) {
       setError("Please fill in all required fields");
       return;
     }
@@ -25,9 +23,7 @@ export default function UploadModal({ onClose, onSuccess }) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("academic_year", academicYear);
-      formData.append("start_date", startDate);
-      if (endDate) formData.append("end_date", endDate);
+      formData.append("academic_year_id", academicYearID);
 
       const res = await api.postForm(endpoints.TIMETABLE_UPLOAD, formData);
       setResult(res.data || res);
@@ -81,42 +77,18 @@ export default function UploadModal({ onClose, onSuccess }) {
           {/* Academic year */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Academic Year <span className="text-red-500">*</span>
+              Academic Year ID<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              value={academicYear}
-              onChange={(e) => setAcademicYear(e.target.value)}
+              value={academicYearID}
+              onChange={(e) => setAcademicYearID(e.target.value)}
               placeholder="2025-2026"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
 
           {/* Date range */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date (optional)
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-          </div>
 
           {/* Error */}
           {error && (
@@ -161,7 +133,7 @@ export default function UploadModal({ onClose, onSuccess }) {
           </button>
           <button
             onClick={handleUpload}
-            disabled={!file || !academicYear || !startDate || uploading}
+            disabled={!file || !academicYearID || uploading}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
           >
             {uploading ? (

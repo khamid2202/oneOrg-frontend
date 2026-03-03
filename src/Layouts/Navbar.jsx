@@ -167,12 +167,6 @@ function Navbar({ isExpanded, setIsExpanded }) {
           {/* Bottom spacer (settings moved to Profile) */}
           <div className="p-4 mt-auto" />
         </div>
-        <div
-          className="ml-5 w-6 h-full absolute right-0 top-0 "
-          onMouseEnter={handleToggleEnter}
-          onMouseLeave={handleToggleLeave}
-          aria-hidden="true"
-        />
       </nav>
 
       {/* Logout Modal */}

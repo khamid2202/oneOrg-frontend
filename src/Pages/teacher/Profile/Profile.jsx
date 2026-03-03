@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useGlobalContext } from "../../../Hooks/UseContext.jsx";
 import { useAuth } from "../../../Hooks/AuthContext.jsx";
 import PasswordChangeModule from "./PasswordChangeModule.jsx";
+import MobileView from "./MobileView.jsx";
 
 function transformApiUser(u) {
   if (!u) return null;
@@ -38,10 +39,11 @@ function Profile() {
   const handleResetPassword = () => setShowReset(true);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center py-10">
-      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl flex flex-col md:flex-row overflow-hidden">
+    <div className="flex bg-[#f8fafc]  items-center justify-center py-10">
+      {/* Desktop layout (hidden on small screens) */}
+      <div className="hidden md:flex w-full max-w-6xl bg-white rounded-3xl shadow-xl md:flex-row overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-full md:w-80 bg-white border-r border-gray-100 flex flex-col items-center justify-between py-10 px-6 gap-8">
+        <div className="w-full md:w-72 bg-white border-r border-gray-100 flex flex-col items-center  py-10 px-6 gap-8">
           {/* Avatar */}
           <div className="relative flex flex-col items-center">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-400 flex items-center justify-center text-white text-5xl font-bold mb-2">
@@ -75,48 +77,38 @@ function Profile() {
           >
             Reset Password
           </button>
-          {/* Log out button moved from Navbar */}
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="w-full inline-flex items-center justify-center rounded-lg bg-white border mt-auto px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
-          >
-            Log Out
-          </button>
-        </aside>
+        </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 md:p-12 flex flex-col gap-4">
+        <div className="flex-1 p-8 md:p-12 flex flex-col gap-4">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               My Profile
             </h2>
             <div className="text-gray-500 mb-2">Personal Information</div>
             <div className="bg-white rounded-2xl shadow p-6 ">
-              {showReset ? (
-                <PasswordChangeModule onCancel={() => setShowReset(false)} />
-              ) : (
-                <>
-                  <div className="text-gray-400 text-sm mb-4">
-                    Tap email or phone to update it.
-                  </div>
-                  <div className="divide-y divide-gray-100">
-                    <ProfileRow label="Full name" value={u.fullName} />
-                    <ProfileRow label="Email" value={u.email} />
-                    <ProfileRow
-                      label="Phone"
-                      value={
-                        u.phone ? (
-                          u.phone
-                        ) : (
-                          <span className="italic text-gray-400">Not set</span>
-                        )
-                      }
-                    />
-                    <ProfileRow label="Username" value={u.username} />
-                  </div>
-                </>
-              )}
+              <div className="text-gray-400 text-sm mb-4">
+                Tap email or phone to update it.
+              </div>
+              <div className="divide-y divide-gray-100">
+                <ProfileRow label="Full name" value={u.fullName} />
+                <ProfileRow label="Email" value={u.email} />
+                <ProfileRow
+                  label="Phone"
+                  value={
+                    u.phone ? (
+                      u.phone
+                    ) : (
+                      <span className="italic text-gray-400">Not set</span>
+                    )
+                  }
+                />
+                <ProfileRow label="Username" value={u.username} />
+              </div>
             </div>
+            {showReset && (
+              <PasswordChangeModule onCancel={() => setShowReset(false)} />
+            )}
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -146,49 +138,58 @@ function Profile() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-      {/* Logout Modal */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white rounded-xl shadow-lg p-8 min-w-[300px] flex flex-col items-center">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">
-              Confirm Logout
-            </h2>
-            <p className="mb-6 text-gray-600">
-              Are you sure you want to log out?
-            </p>
-            <div className="flex gap-4">
-              <button
-                className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
-                onClick={() => {
-                  setShowLogoutModal(false);
-                  logout();
-                }}
-              >
-                Yes, Log Out
-              </button>
-              <button
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
+
+          <div className="w-full flex justify-end  mt-6">
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="rounded-lg bg-white border px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 "
+            >
+              Log Out →
+            </button>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
 
-function SidebarNavItem({ children, icon, active }) {
-  return (
-    <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition font-medium ${active ? "bg-blue-50 text-blue-600" : "text-gray-700 hover:bg-gray-50"}`}
-    >
-      <span className="flex-shrink-0">{icon}</span>
-      <span className="flex flex-col text-left text-base">{children}</span>
+        {/* Logout Modal (desktop only) */}
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-lg p-8 min-w-[300px] flex flex-col items-center">
+              <h2 className="text-lg font-bold mb-4 text-gray-800">
+                Confirm Logout
+              </h2>
+              <p className="mb-6 text-gray-600">
+                Are you sure you want to log out?
+              </p>
+              <div className="flex gap-4">
+                <button
+                  className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                  onClick={() => {
+                    setShowLogoutModal(false);
+                    logout();
+                  }}
+                >
+                  Yes, Log Out
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                  onClick={() => setShowLogoutModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile layout */}
+      <MobileView
+        u={u}
+        showReset={showReset}
+        setShowReset={setShowReset}
+        logout={logout}
+        showLogoutModal={showLogoutModal}
+        setShowLogoutModal={setShowLogoutModal}
+      />
     </div>
   );
 }
