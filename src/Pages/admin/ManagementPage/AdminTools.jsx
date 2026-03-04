@@ -66,7 +66,7 @@ function AdminTools() {
               <Link
                 key={tool.to}
                 to={tool.to}
-                className="group flex min-h-[180px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white  text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group flex sm:min-h-[180px]  flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white  text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <span className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-sm transition-all group-hover:from-purple-700 group-hover:to-purple-600">
                   <Icon size={28} strokeWidth={2} />

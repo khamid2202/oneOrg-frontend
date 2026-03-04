@@ -28,6 +28,7 @@ import New_Invoices from "./Pages/admin/ManagementPage/Invoices2.0/New_Invoices_
 import PointReport from "./Pages/admin/ManagementPage/PointReport/PointReport.jsx";
 import PointExchange from "./Pages/admin/ManagementPage/PointExchange/PointExchange.jsx";
 import Profile from "./Pages/teacher/Profile/Profile.jsx";
+import LeaderBoard from "./Pages/teacher/LeaderBoard/LeaderBoard";
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
             <Route path="/management/invoices-2.0" element={<New_Invoices />} />
             <Route path="/management/point-report" element={<PointReport />} />
             <Route path="/user-profile" element={<Profile />} />
+            <Route path="/leaderboard" element={<LeaderBoard />} />
           </Route>
         </Routes>
       </Router>

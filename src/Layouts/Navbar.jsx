@@ -35,6 +35,7 @@ export const getNavItems = (isAdmin, isTeacher) => {
       icon: <ClipboardPenLine size={20} />,
       label: "Lessons",
     },
+    { to: "/leaderboard", icon: <BarChart2 size={20} />, label: "Leaderboard" },
   ];
 
   if (isAdmin) {

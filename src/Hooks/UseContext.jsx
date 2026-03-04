@@ -62,6 +62,11 @@ export const DataProvider = ({ children }) => {
   const [timetableData, setTimetableData] = useState([]);
   const [timetableLoading, setTimetableLoading] = useState(true);
   const [timetableError, setTimetableError] = useState("");
+
+  // Students with points (leaderboard)
+  const [studentsWithPoints, setStudentsWithPoints] = useState([]);
+  const [studentsWithPointsLoading, setStudentsWithPointsLoading] =
+    useState(false);
   const [timetableRefreshToken, setTimetableRefreshToken] = useState(0);
 
   // Deduplicate students by student_id.
@@ -239,6 +244,25 @@ export const DataProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to fetch students for class group:", err);
       return [];
+    }
+  }, []);
+
+  // Fetch students with points (used for leaderboard and point exchange searches)
+  const fetchStudentsWithPoints = useCallback(async (q = "") => {
+    setStudentsWithPointsLoading(true);
+    try {
+      // Fetch all students (no page_size param, rely on backend to return all)
+      const params = { q };
+      const res = await api.get(endpoints.GET_STUDENTS_WITH_POINTS, params);
+      const list = res?.data?.students || res?.data?.data || [];
+      setStudentsWithPoints(Array.isArray(list) ? list : []);
+      return list;
+    } catch (err) {
+      console.error("Failed to fetch students with points", err);
+      setStudentsWithPoints([]);
+      return [];
+    } finally {
+      setStudentsWithPointsLoading(false);
     }
   }, []);
 
@@ -591,6 +615,10 @@ export const DataProvider = ({ children }) => {
       timetableError,
       timetableDerived,
       refreshTimetable,
+      // leaderboard
+      studentsWithPoints,
+      studentsWithPointsLoading,
+      fetchStudentsWithPoints,
     }),
     [
       students,

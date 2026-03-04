@@ -353,7 +353,7 @@ function AddTeacherModal({ editingTeacher, onClose, onSuccess }) {
               )}
             </label>
             <input
-              type="password"
+              type="text"
               value={formData.password}
               onChange={(e) => handleFormChange("password", e.target.value)}
               placeholder={
